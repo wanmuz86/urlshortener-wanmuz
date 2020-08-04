@@ -23,19 +23,30 @@ router.get('/', (req,res)=>{
 
 // 3) Error handling (as per recommendation use dns core module)
 router.post('/shorturl/new',(req,res)=>{
-	let newUrl = new Url({
-		longUrl:req.body.full_url,
-		shortenUrl:1
-	});
-	newUrl.save().then(doc=>{
+	// Query (findOne, if result is there return the ID else add new)
+	Url.findOne({longUrl:req.body.full_url}, (err,doc)=>{
 		console.log(doc)
-		res.json({message:"Route created"})
+		if(doc){
+			res.json({longUrl:doc.longUrl, shortenUrl:doc.shortenUrl})
+		}
+		else {
+			Url.count({}, (err,count)=>{
+				let number = count+1
+				let newUrl = new Url({
+					longUrl:req.body.full_url,
+					shortenUrl:number
+				});
+				newUrl.save().then(doc=>{
+					console.log(doc)
+					res.json({longUrl:doc.longUrl, shortenUrl:doc.shortenUrl})
+				})
+				.catch(err=>{
+					console.log(err)
+					res.json({message:"Error"})
+				})
+			})
+		}
 	})
-	.catch(err=>{
-		console.log(err)
-		res.json({message:"Error"})
-	})
-	
 })
 
 //4) WHen it is retrieved, add redirection to the saved url (Express redirection)
