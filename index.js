@@ -16,12 +16,7 @@ router.get('/', (req,res)=>{
 	res.json({message:"hooray welcome to my API"});
 })
 
-/// 1) SHould not hardcode to 1 -> Need to manage the shortenUrl Id
-// 2) google.com -> 1, facebook.com -> 2, anak2u.com.my - > 3, google.com ->1, 
-//commonroom.com.my -> 4, facebook.com -> 2, utem.edu.my -> 5
-//
-
-// 3) Error handling (as per recommendation use dns core module)
+// 1) Error handling (as per recommendation use dns core module) (KIV - look for the answer)
 router.post('/shorturl/new',(req,res)=>{
 	// Query (findOne, if result is there return the ID else add new)
 	Url.findOne({longUrl:req.body.full_url}, (err,doc)=>{
@@ -49,20 +44,17 @@ router.post('/shorturl/new',(req,res)=>{
 	})
 })
 
-//4) WHen it is retrieved, add redirection to the saved url (Express redirection)
-// 5) If the :id given does not exist -> error handling
+
 router.get('/shorturl/:id',(req,res)=>{
-	// find() will return an Array -> If we are expecting an Array , multiple Results
-	//findOne() will return an Object -> if we are expevtion One result
-	// findById()
+
 	Url.findOne({shortenUrl:req.params.id})
 	.then(doc=>{
 		console.log(doc)
-		res.json({longUrl:doc.longUrl})
+		res.redirect('https://'+doc.longUrl);
 	})
 	.catch(err =>{
 		console.log(err);
-		res.json({message:"Error"})
+		res.json({message:"Error, url not found"})
 	})
 	
 })
